@@ -23,6 +23,10 @@ class BPMCounter:
         self.reset_button = tk.Button(self.root, text="Reset (Press 'Esc')", command=self.reset_counter)
         self.reset_button.pack()
 
+        self.stay_on_top_var = tk.BooleanVar(value=False)  # Initialize the variable with False
+        self.stay_on_top_check = tk.Checkbutton(self.root, text="Stay on Top", variable=self.stay_on_top_var, command=self.toggle_stay_on_top)
+        self.stay_on_top_check.pack()
+
         self.is_counting = False
         self.key_press_times = []  # Store key press times for averaging
         self.bpm_history = []  # Store BPM history for averaging
@@ -45,6 +49,9 @@ class BPMCounter:
             x_offset, y_offset = event.x - self.x, event.y - self.y
             self.root.geometry(f"+{self.root.winfo_x() + x_offset}+{self.root.winfo_y() + y_offset}")
 
+    def toggle_stay_on_top(self):
+        self.root.wm_attributes("-topmost", self.stay_on_top_var.get())
+
     def on_key_press(self, e):
         if not self.is_counting:
             self.is_counting = True
@@ -60,7 +67,7 @@ class BPMCounter:
             bpm = int(60 / (elapsed_time / (len(self.key_press_times) - 1)))  # Calculate BPM without the most recent key press
             self.bpm_history.append(bpm)
             if len(self.bpm_history) > 8:
-                self.bpm_history.pop(0)  # Keep the last 5 BPM values for averaging
+                self.bpm_history.pop(0)  # Keep the last 8 BPM values for averaging
             avg_bpm = sum(self.bpm_history) / len(self.bpm_history)
             self.bpm_label.config(text=f"BPM: {int(avg_bpm)}")
 
